@@ -1,5 +1,10 @@
 {
   "name": "sample-http",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "devDependencies": {
+    "jest": "^23.1.0"
+  },
+  "scripts": {
+    "test": "jest"
+  }
 }
-
