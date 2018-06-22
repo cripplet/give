@@ -1,7 +1,5 @@
 # give
 
-index.js: add funcs / import here
-
-https://github.com/facebook/jest
-
-npm test
+npm run-script build
+npm run-script test # copy over service account deets
+npm run-script prettify

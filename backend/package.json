@@ -8,7 +8,8 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "jest"
+    "test": "jest",
+    "prettify": "prettier --write '**/*.ts'"
   },
   "main": "lib/index.js",
   "jest": {
@@ -27,7 +28,10 @@
     "firebase-functions": "^1.0.3"
   },
   "devDependencies": {
+    "@types/jest": "^23.1.1",
+    "firebase-functions-test": "^0.1.2",
     "jest": "^23.1.0",
+    "prettier": "1.13.5",
     "ts-jest": "^22.4.6",
     "tslint": "^5.8.0",
     "typescript": "^2.5.3"
