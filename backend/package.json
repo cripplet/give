@@ -9,7 +9,7 @@
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "test": "jest",
-    "prettify": "prettier --write '**/*.ts'"
+    "prettify": "prettier --arrow-parens=always --write '**/*.ts'"
   },
   "main": "lib/index.js",
   "jest": {
