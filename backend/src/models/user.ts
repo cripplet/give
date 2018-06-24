@@ -1,4 +1,18 @@
 import * as admin from "firebase-admin";
+import * as rest from "typed-rest-client/RestClient";
+
+const loginUser = async () => {
+  let client: rest.RestClient = new rest.RestClient(
+    'oauth-getter',
+    'https://accounts.google.com',
+  );
+  
+};
+
+const getJWTCredentials = async (uid: string): Promise<string> => {
+  // assuming uid exists
+  return admin.auth().createCustomToken(uid);
+};
 
 const createUser = async (
   username: string,
@@ -17,11 +31,12 @@ const createUser = async (
 
 const deleteUser = async (request: GetUserRequest): Promise<void> => {
   if (!request.uid) {
-    let user = await getUser(request);
-    request.uid = user.uid;
+    let user_req = getUser(request);
+    return user_req.then((userRecord) => {
+      return admin.auth().deleteUser(userRecord.uid);
+    });
   }
-  let delete_user_req = admin.auth().deleteUser(request.uid);
-  return delete_user_req;
+  return admin.auth().deleteUser(request.uid);
 };
 
 interface GetUserRequest {
@@ -44,28 +59,7 @@ const getUser = async (
 
 // const update = async (user: User):
 
-// Looks like client lib has user.delete?
-
-const listAllUsers = (nextPageToken): Promise<any> => {
-  return admin
-    .auth()
-    .listUsers(1000, nextPageToken)
-    .then((listUsersResult) => {
-      console.log("HIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
-      return listUsersResult;
-    })
-    .catch((error) => {
-      console.log("ERROR", error);
-      return null;
-    });
-};
-
-const f = (x: string): number => {
-  return 1;
-};
-
 export { createUser };
 export { deleteUser };
 export { getUser };
-export { listAllUsers };
-export { f };
+export { getJWTCredentials };
