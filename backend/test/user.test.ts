@@ -17,7 +17,7 @@ describe("Test Admin SDK User management", (): void => {
   beforeEach(async (): Promise<void> => {
     await user.deleteUser({ email: userDetails.email });
   });
-  test("testCreateUser", async (): Promise<void> => {
+  test("testCreateUser", async (done): Promise<void> => {
     let create_user_req = user.createUser(
       userDetails.username,
       userDetails.email,
@@ -35,11 +35,12 @@ describe("Test Admin SDK User management", (): void => {
       .then(
         (userRecord): void => {
           expect(expected).toEqual(userRecord);
+          done();
         }
       );
     await create_user_req;
   });
-  test("getJWTCredentials", async (): Promise<void> => {
+  test("getJWTCredentials", async (done): Promise<void> => {
     let create_user_req = user.createUser(
       userDetails.username,
       userDetails.email,
@@ -49,10 +50,8 @@ describe("Test Admin SDK User management", (): void => {
     create_user_req.then((userRecord): Promise<string> => {
       expected = Object.assign({}, userRecord);
       return user.getJWTCredentials(userRecord.uid);
-    }).then(async (jwtCredentials): Promise<void> => {
-      console.log(jwtCredentials);
-      expected = await user.getUser({ uid: expected.uid });
-      console.log(expected);
+    }).then((jwtCredentials: string): void => {
+      done();
     });
     await create_user_req;
   });

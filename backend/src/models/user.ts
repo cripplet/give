@@ -1,17 +1,14 @@
 import * as admin from "firebase-admin";
-import * as rest from "typed-rest-client/RestClient";
 
-const loginUser = async () => {
-  let client: rest.RestClient = new rest.RestClient(
-    'oauth-getter',
-    'https://accounts.google.com',
-  );
-  
-};
-
-const getJWTCredentials = async (uid: string): Promise<string> => {
+const getJWTCredentials = async (idToken: string): Promise<string> => {
   // assuming uid exists
-  return admin.auth().createCustomToken(uid);
+  // pass this to all calls that need it -- we will auth using this
+  // not with the Google credentials
+  // get via client getIdToken().
+  return admin.auth().verifyIdToken(idToken, true).then(
+    (decodedIdToken: admin.auth.DecodedIdToken): Promise<string> => {
+      return admin.auth().createCustomToken(decodedIdToken.uid);
+    })
 };
 
 const createUser = async (
