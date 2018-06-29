@@ -3,12 +3,12 @@ import * as admin from "firebase-admin";
 const getJWTCredentials = async (idToken: string): Promise<string> => {
   // assuming uid exists
   // pass this to all calls that need it -- we will auth using this
-  // not with the Google credentials
-  // get via client getIdToken().
+  // not with the Google credentials for API-based stuff.
+  // get via client getIdToken()
   return admin.auth().verifyIdToken(idToken, true).then(
     (decodedIdToken: admin.auth.DecodedIdToken): Promise<string> => {
       return admin.auth().createCustomToken(decodedIdToken.uid);
-    })
+    });
 };
 
 const createUser = async (
@@ -53,8 +53,6 @@ const getUser = async (
     return admin.auth().getUserByPhoneNumber(request.phone);
   }
 };
-
-// const update = async (user: User):
 
 export { createUser };
 export { deleteUser };
