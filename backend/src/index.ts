@@ -1,7 +1,7 @@
 import * as admin from "firebase-admin";
-import * as config from "../env/prod/config";
+import * as config from "../env/config";
 
-admin.initializeApp(config.config());
+admin.initializeApp(config.config("prod").adminAppConfig);
 
 // import * as functions from "firebase-functions";
 

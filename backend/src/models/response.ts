@@ -1,10 +1,10 @@
 import * as admin from "firebase-admin";
 
-const createResponse = async (
+const createResponse = (
   idToken: string,
   surveyID: string,
-  response: string,
-): Promise<bool> => {
+  response: string
+): void => {
   // update read-only user response history
   // validate surveyID, response
 };
