@@ -50,8 +50,8 @@ interface Config {
   clientAppConfig: ClientAppConfig;
 }
 
-const config = (env: string) => {
-  let serviceAccountCredential = require(`./${env}/service_account.json`);
+const config = (env: string): Config => {
+  const serviceAccountCredential = require(`./${env}/service_account.json`);
   return {
     adminAppConfig: {
       credential: admin.credential.cert(serviceAccountCredential),
