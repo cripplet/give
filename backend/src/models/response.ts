@@ -9,19 +9,29 @@ const createResponse = (
   surveyID: string,
   response: string
 ): Promise<void> => {
-  const docRef = admin.firestore().collection("surveys").doc(surveyID);
-  return admin.auth().verifyIdToken(idToken, true).then(
-    (decodedIdToken: admin.auth.DecodedIdToken): Promise<admin.firestore.DocumentSnapshot> => {
-      return docRef.get();
-  }).then((docSnapshot: admin.firestore.DocumentSnapshot) => {
-    if (docSnapshot.exists) {
-      return docRef.set({
-        response: response
-      });
-    } else {
-      return Promise.reject(new Error("Survey does not exist"));
-    }
-  });
+  const docRef = admin
+    .firestore()
+    .collection("surveys")
+    .doc(surveyID);
+  return admin
+    .auth()
+    .verifyIdToken(idToken, true)
+    .then(
+      (
+        decodedIdToken: admin.auth.DecodedIdToken
+      ): Promise<admin.firestore.DocumentSnapshot> => {
+        return docRef.get();
+      }
+    )
+    .then((docSnapshot: admin.firestore.DocumentSnapshot) => {
+      if (docSnapshot.exists) {
+        return docRef.set({
+          response: response
+        });
+      } else {
+        return Promise.reject(new Error("Survey does not exist"));
+      }
+    });
 };
 
 export { createResponse };

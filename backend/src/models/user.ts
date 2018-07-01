@@ -1,18 +1,18 @@
 import * as admin from "firebase-admin";
+import { from, Observable } from "rxjs";
+import { flatMap, map } from "rxjs/operators";
 
-const getJWTCredentials = (idToken: string): Promise<string> => {
-  // assuming uid exists
-  // pass this to all calls that need it -- we will auth using this
-  // not with the Google credentials for API-based stuff.
-  // get via client getIdToken()
-  return admin
-    .auth()
-    .verifyIdToken(idToken, true)
-    .then(
-      (decodedIdToken: admin.auth.DecodedIdToken): Promise<string> => {
-        return admin.auth().createCustomToken(decodedIdToken.uid);
-      }
-    );
+/* TODO(cripplet): Check error handling. */
+const getJWTCredentials = (idToken: string): Observable<string> => {
+  return from(admin.auth().verifyIdToken(idToken, true)).pipe(
+    map(
+      (decodedIdToken: admin.auth.DecodedIdToken): string => decodedIdToken.uid
+    ),
+    flatMap(
+      (uid: string): Observable<string> =>
+        from(admin.auth().createCustomToken(uid))
+    )
+  );
 };
 
 export { getJWTCredentials };

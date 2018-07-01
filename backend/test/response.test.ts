@@ -22,42 +22,42 @@ interface VerifyCustomTokenResponse {
   expiresIn: string;
 }
 
-const createTestUser = (): Promise<VerifyCustomTokenResponse> {
-    return admin
-      .auth()
-      .createUser({
-        disabled: false, // allow sign-in
-        displayName: userDetails.username,
-        email: userDetails.email,
-        emailVerified: false,
-        phoneNumber: userDetails.phone
-      })
-      .then((userRecord: admin.auth.UserRecord) => {
-        return admin.auth().createCustomToken(userRecord.uid);
-      })
-      .then(
-        (
-          customToken: string
-        ): request.RequestPromise<VerifyCustomTokenResponse> => {
-          return request({
-            // sign in as the user to get ID token
-            method: "POST",
-            uri:
-              "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken",
-            qs: {
-              key: config.config("dev").clientAppConfig.apiKey
-            },
-            headers: {
-              "Content-Type": "application/json"
-            },
-            json: true,
-            body: {
-              token: customToken,
-              returnSecureToken: true
-            }
-          });
-        }
-      );
+const createTestUser = (): Promise<VerifyCustomTokenResponse> => {
+  return admin
+    .auth()
+    .createUser({
+      disabled: false, // allow sign-in
+      displayName: userDetails.username,
+      email: userDetails.email,
+      emailVerified: false,
+      phoneNumber: userDetails.phone
+    })
+    .then((userRecord: admin.auth.UserRecord) => {
+      return admin.auth().createCustomToken(userRecord.uid);
+    })
+    .then(
+      (
+        customToken: string
+      ): request.RequestPromise<VerifyCustomTokenResponse> => {
+        return request({
+          // sign in as the user to get ID token
+          method: "POST",
+          uri:
+            "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken",
+          qs: {
+            key: config.config("dev").clientAppConfig.apiKey
+          },
+          headers: {
+            "Content-Type": "application/json"
+          },
+          json: true,
+          body: {
+            token: customToken,
+            returnSecureToken: true
+          }
+        });
+      }
+    );
 };
 
 describe("Test Response Parsing", (): void => {
@@ -78,7 +78,8 @@ describe("Test Response Parsing", (): void => {
       });
   });
   test("surveyNotCreated", (done: jest.DoneCallback): Promise<void> => {
-      return createTestUser().then(
+    return createTestUser()
+      .then(
         (
           verifyCustomTokenResponse: VerifyCustomTokenResponse
         ): Promise<void> => {
@@ -89,7 +90,8 @@ describe("Test Response Parsing", (): void => {
             ""
           );
         }
-      ).catch(() => {
+      )
+      .catch(() => {
         done();
       });
   });

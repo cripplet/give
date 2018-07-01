@@ -26,7 +26,8 @@
   },
   "dependencies": {
     "firebase-admin": "^5.12.1",
-    "firebase-functions": "^1.0.3"
+    "firebase-functions": "^1.0.3",
+    "rxjs": "^6.2.1"
   },
   "devDependencies": {
     "@types/jest": "^23.1.3",

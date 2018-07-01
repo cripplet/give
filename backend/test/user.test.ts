@@ -1,7 +1,11 @@
 import "jest";
 
 import * as admin from "firebase-admin";
+import * as requestBase from "request";
 import * as request from "request-promise-native";
+
+import { of, from, fromEvent, Observable } from "rxjs";
+import { flatMap, map, onErrorResumeNext } from "rxjs/operators";
 
 import * as config from "../env/config";
 import * as user from "../src/models/user";
@@ -22,71 +26,74 @@ interface VerifyCustomTokenResponse {
 }
 
 describe("Test Admin SDK User management", (): void => {
-  beforeEach((done: jest.DoneCallback): Promise<void> => {
-    return admin
-      .auth()
-      .getUserByEmail(userDetails.email)
-      .then(
-        (userRecord: admin.auth.UserRecord): Promise<void> => {
-          return admin.auth().deleteUser(userRecord.uid);
-        }
-      )
-      .then(() => {
-        done();
-      })
-      .catch(() => {
-        done();
-      });
+  beforeEach((done: jest.DoneCallback): void => {
+    const observable: Observable<void> = of(userDetails.email).pipe(
+      flatMap(
+        (email: string): Observable<admin.auth.UserRecord> =>
+          from(admin.auth().getUserByEmail(email))
+      ),
+      map((userRecord: admin.auth.UserRecord): string => userRecord.uid),
+      flatMap(
+        (uid: string): Observable<void> => from(admin.auth().deleteUser(uid))
+      ),
+      onErrorResumeNext(of())
+    );
+    observable.subscribe({
+      complete: done
+    });
   });
-  test("getJWTCredentials", (done: jest.DoneCallback): Promise<void> => {
-    return admin
-      .auth()
-      .createUser({
+  test("getCorrectJWTCredentials", (done: jest.DoneCallback): void => {
+    const observable: Observable<string> = from(
+      admin.auth().createUser({
         disabled: false, // allow sign-in
         displayName: userDetails.username,
         email: userDetails.email,
         emailVerified: false,
         phoneNumber: userDetails.phone
       })
-      .then(
-        (userRecord: admin.auth.UserRecord): Promise<string> => {
-          return admin.auth().createCustomToken(userRecord.uid);
+    ).pipe(
+      map((userRecord: admin.auth.UserRecord): string => userRecord.uid),
+      flatMap(
+        (uid: string): Observable<string> =>
+          from(admin.auth().createCustomToken(uid))
+      ),
+      flatMap(
+        (customToken: string): Observable<VerifyCustomTokenResponse> =>
+          from(
+            request({
+              // sign in as the user to get ID token
+              method: "POST",
+              uri:
+                "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken",
+              qs: {
+                key: config.config("dev").clientAppConfig.apiKey
+              },
+              headers: {
+                "Content-Type": "application/json"
+              },
+              json: true,
+              body: {
+                token: customToken,
+                returnSecureToken: true
+              }
+            })
+          )
+      ),
+      map(
+        (response: VerifyCustomTokenResponse): string => {
+          expect(response.idToken).toBeTruthy();
+          return response.idToken;
         }
+      ),
+      flatMap(
+        (idToken: string): Observable<string> => user.getJWTCredentials(idToken)
       )
-      .then(
-        (
-          customToken: string
-        ): request.RequestPromise<VerifyCustomTokenResponse> => {
-          return request({
-            // sign in as the user to get ID token
-            method: "POST",
-            uri:
-              "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken",
-            qs: {
-              key: config.config("dev").clientAppConfig.apiKey
-            },
-            headers: {
-              "Content-Type": "application/json"
-            },
-            json: true,
-            body: {
-              token: customToken,
-              returnSecureToken: true
-            }
-          });
-        }
-      )
-      .then(
-        (response: VerifyCustomTokenResponse): Promise<string> => {
-          expect(response.idToken).not.toBe("");
-          return user.getJWTCredentials(response.idToken);
-        }
-      )
-      .then(
-        (customToken: string): void => {
-          expect(customToken).not.toBe("");
-          done();
-        }
-      );
+    );
+    observable.subscribe(
+      (customToken: string): void => {
+        expect(customToken).toBeTruthy();
+        done();
+      }
+    );
   });
 });
