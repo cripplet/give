@@ -1,10 +1,9 @@
 import "jest";
 
 import * as admin from "firebase-admin";
-import * as requestBase from "request";
 import * as request from "request-promise-native";
 
-import { of, from, fromEvent, Observable } from "rxjs";
+import { of, from, Observable } from "rxjs";
 import { flatMap, map, onErrorResumeNext } from "rxjs/operators";
 
 import * as config from "../env/config";

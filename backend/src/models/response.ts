@@ -1,18 +1,20 @@
 import * as admin from "firebase-admin";
 
-function getReturnType<R>(fn: (...args: any[]) => R): R {
-  return {} as R;
-}
+import { from, Observable } from "rxjs";
+import { flatMap, map } from "rxjs/operators";
 
 const createResponse = (
   idToken: string,
   surveyID: string,
   response: string
-): Promise<void> => {
+): Observable<void> => {
   const docRef = admin
     .firestore()
     .collection("surveys")
     .doc(surveyID);
+  const observable: Observable<void> = of(surveyID).pipe(
+    map((surveyID: string): admin.auth.DocumentReference => admin.firestore().collection("surveys").doc(surveyID)),
+  );
   return admin
     .auth()
     .verifyIdToken(idToken, true)
